@@ -9,17 +9,24 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    // database/migrations/xxxx_create_transactions_table.php
     public function up(): void
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained(); // Siapa yang beli
-            $table->foreignId('course_id')->constrained(); // Video apa yang dibeli
 
-            $table->integer('amount'); // Harga saat beli (misal 250000)
+            // Relasi: Siapa yang beli?
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+
+            // Relasi: Beli kelas apa?
+            $table->foreignId('course_id')->constrained()->onDelete('cascade');
+
+            // Info Transaksi
+            $table->string('invoice_code')->unique(); // Contoh: TRX-001
+            $table->integer('amount'); // Harga total bayar
             $table->string('status')->default('pending'); // pending, success, failed
-            $table->string('snap_token')->nullable(); // Untuk Midtrans (jika pakai)
+
+            // Khusus Midtrans (Nanti dipakai)
+            $table->string('snap_token')->nullable();
 
             $table->timestamps();
         });
@@ -30,6 +37,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('transactions');
     }
 };

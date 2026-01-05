@@ -1,290 +1,235 @@
 @extends('layouts.app')
 
 @section('content')
-    {{--
-        DATA DUMMY
-        (Biasanya data ini dikirim dari Controller, tapi untuk prototyping kita taruh sini)
-    --}}
-    @php
-        $dummyClasses = [
-            [
-                'title' => 'Pengenalan Laravel 11',
-                'category' => 'Backend',
-                'price' => 0, // 0 = GRATIS
-                'desc' => 'Video pengenalan dasar framework Laravel, instalasi, dan struktur folder.',
-                'duration' => '45 Menit'
-            ],
-            [
-                'title' => 'Mastering UI/UX Design',
-                'category' => 'Desain',
-                'price' => 250000, // Berbayar
-                'desc' => 'Panduan lengkap membuat desain aplikasi mobile yang estetik dan user-friendly.',
-                'duration' => '12 Jam'
-            ],
-            [
-                'title' => 'Basic English Conversation',
-                'category' => 'Bahasa',
-                'price' => 0, // GRATIS
-                'desc' => 'Latihan percakapan bahasa Inggris sehari-hari untuk pemula.',
-                'duration' => '1 Jam 30 Menit'
-            ],
-            [
-                'title' => 'Fullstack Web Development',
-                'category' => 'Fullstack',
-                'price' => 500000, // Berbayar
-                'desc' => 'Bangun website toko online dari nol sampai deploy ke server.',
-                'duration' => '24 Jam'
-            ],
-            [
-                'title' => 'Tips Lolos Interview Kerja',
-                'category' => 'Karir',
-                'price' => 0, // GRATIS
-                'desc' => 'Tips dan trik menjawab pertanyaan HRD agar diterima kerja.',
-                'duration' => '20 Menit'
-            ],
-            [
-                'title' => 'Algoritma & Struktur Data',
-                'category' => 'CS Dasar',
-                'price' => 150000, // Berbayar
-                'desc' => 'Pahami fondasi penting pemrograman untuk menjadi software engineer.',
-                'duration' => '5 Jam'
-            ],
-        ];
-    @endphp
 
-    {{-- SECTION 1: JUMBOTRON --}}
-    <div class="container-fluid section-jumbotron">
-        <div class="jumbotron">
-            <div class="jumbotron-content">
-                <div class="row align-items-center">
-                    <div class="col-md-5 col-7">
-                        <div class="py-4 ms-4">
-                            <h1 class="display-4 jumbotron-title">Tentor Sebaya</h1>
-                            <p class="lead">
-                                Platform belajar video interaktif. Pilih kelas gratis untuk mencoba
-                                atau berlangganan premium untuk materi eksklusif.
-                            </p>
-                            <a href="#kelas-terbaru" class="btn btn-primary rounded-pill px-4 mt-3">Mulai Belajar</a>
+{{-- HEADER / BANNER --}}
+<div class="bg-dark text-white py-5 border-bottom border-secondary" style="margin-top: 55px">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-5 fw-bold">Jelajahi Kelas</h1>
+                <p class="lead text-white-50">Tingkatkan skill codingmu dengan materi berkualitas dari mentor berpengalaman.</p>
+            </div>
+            <div class="col-lg-6 text-lg-end">
+                {{-- Tampilkan Status User di Header --}}
+                @auth
+                    @if(Auth::user()->is_premium)
+                        <div class="d-inline-block bg-success text-white px-4 py-2 rounded-pill fw-bold shadow-sm border border-success">
+                            <i class="fa-solid fa-crown me-2"></i> MEMBER PREMIUM
                         </div>
-                    </div>
-                    <div class="col-md-7 col-5 jumbotron-img">
-                        <div class="jumbotron-layer"></div>
-                        <img src="{{ asset('assets/img/Jumbotron-img.png') }}" alt="Ilustrasi Belajar" class="img-fluid">
-                    </div>
-                </div>
+                    @else
+                        <a href="{{ route('subscription.index') }}" class="btn btn-outline-warning rounded-pill px-4 fw-bold">
+                            <i class="fa-solid fa-crown me-2"></i> Upgrade Premium
+                        </a>
+                    @endif
+                @else
+                @endauth
             </div>
         </div>
     </div>
+</div>
 
-    {{-- SECTION 2: LIST KELAS (SWIPER) --}}
-    {{-- mb-5 dan pb-5 di sini PENTING agar tidak menabrak Footer --}}
-    <div id="kelas-terbaru" class="container my-5 pb-5">
+{{-- DAFTAR KELAS --}}
+<div class="container my-5">
 
-        {{-- Header Section --}}
-        <div class="d-flex justify-content-between align-items-center mb-4 px-md-4">
-            <h3 class="new-added-title m-0">Kelas Terbaru</h3>
-            <a href="#" class="text-decoration-none fw-bold" style="color: #34495e;">
-                Lihat Semua <i class="fa-solid fa-arrow-right-long ms-1"></i>
-            </a>
-        </div>
+    {{-- ==========================================
+       UPDATE: FORM PENCARIAN + DROPDOWN
+    ========================================== --}}
 
-        {{-- Wrapper Swiper (Relatif untuk tombol navigasi) --}}
-        <div class="swiper-container-wrapper">
-            <div class="swiper mySwiper">
-                <div class="swiper-wrapper">
+    {{-- Kita bungkus semua dalam satu form agar Search & Kategori bekerja bersamaan --}}
+    <form action="{{ route('dashboard') }}" method="GET">
+        <div class="row mb-5 align-items-center justify-content-between">
 
-                    {{-- LOOP DATA --}}
-                    @foreach($dummyClasses as $kelas)
-                        {{-- Logika Cek Harga --}}
-                        @php $isFree = $kelas['price'] == 0; @endphp
-
-                        <div class="swiper-slide">
-                            {{-- Card Utama --}}
-                            {{-- Class kondisional: border-free (Hijau) atau border-premium (Emas) --}}
-                            <div class="card class-card-video border-0 shadow-sm h-100 {{ $isFree ? 'border-free' : 'border-premium' }}">
-                                <div class="card-body d-flex flex-column p-4 position-relative">
-
-                                    {{-- Badge Pojok Kanan Atas --}}
-                                    <div class="video-badge {{ $isFree ? 'bg-success' : 'bg-warning text-dark' }}">
-                                        @if($isFree)
-                                            <i class="fa-solid fa-unlock me-1"></i> GRATIS
-                                        @else
-                                            <i class="fa-solid fa-crown me-1"></i> PREMIUM
-                                        @endif
-                                    </div>
-
-                                    {{-- Baris Kategori & Durasi --}}
-                                    <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
-                                        <span class="badge-category-simple">{{ $kelas['category'] }}</span>
-                                        <small class="text-muted" style="font-size: 0.8rem;">
-                                            <i class="fa-regular fa-clock me-1"></i> {{ $kelas['duration'] }}
-                                        </small>
-                                    </div>
-
-                                    {{-- Judul Kelas --}}
-                                    <h5 class="card-title fw-bold text-dark mb-2">{{ $kelas['title'] }}</h5>
-
-                                    {{-- Deskripsi Singkat --}}
-                                    <p class="text-muted small mb-4">
-                                        {{ Str::limit($kelas['desc'], 70) }}
-                                    </p>
-
-                                    {{-- Footer Card (Harga & Tombol) --}}
-                                    <div class="mt-auto pt-3 border-top">
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            @if($isFree)
-                                                <span class="text-success fw-bold fs-5">Rp 0</span>
-                                            @else
-                                                <span class="price-text fs-5">Rp {{ number_format($kelas['price'], 0, ',', '.') }}</span>
-                                            @endif
-                                        </div>
-
-                                        {{-- Tombol Aksi Berbeda --}}
-                                        @if($isFree)
-                                            <a href="#" class="btn btn-outline-success w-100 rounded-pill fw-bold btn-sm py-2">
-                                                <i class="fa-solid fa-play me-1"></i> Tonton Sekarang
-                                            </a>
-                                        @else
-                                            <a href="#" class="btn btn-custom-bright w-100 rounded-pill fw-bold btn-sm py-2">
-                                                <i class="fa-solid fa-lock me-1"></i> Beli Kelas
-                                            </a>
-                                        @endif
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                    {{-- END LOOP --}}
-
-                </div>
-
-                {{-- Pagination (Titik-titik bawah) --}}
-                <div class="swiper-pagination"></div>
+            {{-- Bagian Kiri: Judul atau Info --}}
+            <div class="col-md-4 mb-3 mb-md-0">
+                <h4 class="fw-bold mb-0 text-white">
+                    @if(request('category'))
+                        Kategori: <span class="text-primary">{{ $categories->firstWhere('slug', request('category'))->name }}</span>
+                    @elseif(request('search'))
+                        Hasil: "{{ request('search') }}"
+                    @else
+                        Semua Kelas
+                    @endif
+                </h4>
+                <p class="text-white small mb-0">Menampilkan {{ $courses->count() }} kursus tersedia</p>
             </div>
 
-            {{-- Tombol Panah Kiri Kanan (Di luar .swiper tapi di dalam .wrapper) --}}
-            <div class="swiper-button-prev custom-nav-btn"></div>
-            <div class="swiper-button-next custom-nav-btn"></div>
+            {{-- Bagian Kanan: Input Search & Dropdown --}}
+            <div class="col-md-8">
+                <div class="row g-2">
+
+                    {{-- 1. Input Pencarian --}}
+                    <div class="col-md-7 col-lg-8">
+                        <div class="input-group shadow-sm rounded-pill overflow-hidden bg-white border">
+                            <span class="input-group-text bg-white border-0 ps-4">
+                                <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                            </span>
+                            <input type="text" name="search" class="form-control border-0 py-2"
+                                   placeholder="Cari kelas..."
+                                   value="{{ request('search') }}">
+                        </div>
+                    </div>
+
+                    {{-- 2. Dropdown Kategori --}}
+                    <div class="col-md-5 col-lg-4">
+                        <div class="position-relative">
+                            {{-- Icon Filter (Hiasan) --}}
+                            <i class="fa-solid fa-filter position-absolute text-muted"
+                               style="top: 50%; left: 15px; transform: translateY(-50%); z-index: 10;"></i>
+
+                            {{-- Select Input --}}
+                            {{-- onchange="this.form.submit()" membuat form otomatis dikirim saat user memilih opsi --}}
+                            <select name="category" class="form-select border shadow-sm rounded-pill ps-5 py-2 fw-bold text-muted cursor-pointer"
+                                    onchange="this.form.submit()"
+                                    style="background-color: #fff;">
+
+                                <option value="">Semua Kategori</option>
+
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat->slug }}" {{ request('category') == $cat->slug ? 'selected' : '' }}>
+                                        {{ $cat->name }}
+                                    </option>
+                                @endforeach
+
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
         </div>
+    </form>
+
+    {{-- ==========================================
+       GRID KELAS (Tetap Sama)
+    ========================================== --}}
+    <div class="row g-4">
+        {{-- ... Kode Loop Foreach Courses Anda di sini (tidak perlu diubah) ... --}}
     </div>
+</div>
+
+    {{-- ==========================================
+       GRID KELAS (Kode Lama Anda di bawah ini)
+    ========================================== --}}
+
+    <div class="row g-4 mb-5">
+        {{-- Jika Hasil Pencarian Kosong --}}
+        @if($courses->count() == 0)
+            <div class="col-12 text-center py-5">
+                <div class="mb-3">
+                    <i class="fa-solid fa-box-open fa-3x text-white"></i>
+                </div>
+                <h4 class="fw-bold text-white">Kelas tidak ditemukan</h4>
+                <p class="text-white">Coba kata kunci lain atau reset filter.</p>
+                <a href="{{ route('dashboard') }}" class="btn btn-outline-primary rounded-pill">Reset Pencarian</a>
+            </div>
+        @else
+            {{-- Loop Kartu (Kode yang sudah ada sebelumnya) --}}
+            @foreach($courses as $kelas)
+               {{-- ... Biarkan kode kartu yang tadi ... --}}
+               {{-- PASTIKAN LOOP FOREACH LAMA ANDA ADA DI SINI --}}
+            @endforeach
+        @endif
+    </div>
+
+    </div>
+
+    <div class="row g-4">
+        @foreach($courses as $kelas)
+            {{-- LOGIKA PENENTUAN AKSES --}}
+            @php
+                $isFree = $kelas->price == 0;
+                $isLoggedIn = Auth::check(); // Cek apakah user sudah login
+                $isPremiumUser = $isLoggedIn && Auth::user()->is_premium;
+
+                // User boleh nonton jika: Kelasnya Gratis ATAU Usernya Premium
+                $canAccess = $isFree || $isPremiumUser;
+            @endphp
+
+            <div class="col-md-2">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden course-card-hover">
+
+                    {{-- Thumbnail / Badge --}}
+                    <div class="position-relative bg-light overflow-hidden" style="height: 200px;">
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode($kelas->title) }}&background=random&size=400"
+                             class="w-100 h-100 object-fit-cover" alt="{{ $kelas->title }}">
+
+                        <div class="position-absolute top-0 end-0 m-3">
+                            @if($isFree)
+                                <span class="badge bg-success shadow-sm">GRATIS</span>
+                            @else
+                                <span class="badge bg-dark shadow-sm"><i class="fa-solid fa-crown text-warning"></i> PREMIUM</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4 d-flex flex-column">
+                        <small class="text-primary fw-bold text-uppercase mb-2" style="font-size: 0.75rem; letter-spacing: 1px;">
+                            {{ $kelas->category->name }}
+                        </small>
+
+                        <h5 class="card-title fw-bold text-dark mb-2">{{ $kelas->title }}</h5>
+
+                        <p class=" small mb-4 flex-grow-1">
+                            {{ Str::limit($kelas->description, 80) }}
+                        </p>
+
+                        <div class="d-flex justify-content-between align-items-cente small mb-3 border-top pt-3">
+                            <span><i class="fa-regular fa-clock me-1"></i> {{ $kelas->duration }}</span>
+                            <span><i class="fa-solid fa-users me-1"></i> 120 Siswa</span>
+                        </div>
+
+                        {{-- ======================================================
+                           LOGIKA TOMBOL UTAMA
+                           ====================================================== --}}
+
+                        @if($canAccess)
+                            {{-- KONDISI 1: User Boleh Akses (Gratis / Premium) --}}
+                            <a href="{{ route('course.show', $kelas->slug) }}" class="btn btn-success w-100 rounded-pill fw-bold py-2">
+                                <i class="fa-solid fa-play me-2"></i> Tonton Sekarang
+                            </a>
+
+                        @else
+                            {{-- KONDISI 2: Kelas Berbayar & Akses Ditolak --}}
+
+                            @if($isLoggedIn)
+                                {{-- Sub-Kondisi A: Sudah Login tapi Masih Free (Belum Premium) --}}
+                                {{-- Arahkan ke detail untuk lihat penawaran upgrade --}}
+                                <a href="{{ route('course.show', $kelas->slug) }}" class="btn btn-outline-dark w-100 rounded-pill fw-bold py-2">
+                                    <i class="fa-solid fa-lock me-2"></i> Akses Premium
+                                </a>
+
+                            @else
+                                {{-- Sub-Kondisi B: BELUM LOGIN (GUEST) --}}
+                                {{-- Arahkan ke Login dengan Peringatan --}}
+                                <a href="{{ route('login') }}"
+                                   class="btn btn-primary w-100 rounded-pill fw-bold py-2"
+                                   onclick="return alert('Maaf, ini adalah Konten Premium.\n\nSilakan LOGIN atau DAFTAR terlebih dahulu untuk melihat detail kelas ini.')">
+                                    <i class="fa-solid fa-right-to-bracket me-2"></i> Login untuk Akses
+                                </a>
+                            @endif
+
+                        @endif
+
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+
+</div>
+
 @endsection
 
+@section('styles')
 <style>
-    /* =========================================
-   STYLING CARD VIDEO & SWIPER (TENTOR SEBAYA)
-   ========================================= */
-
-/* 1. Wrapper Utama Swiper */
-/* Memberi jarak margin bawah agar tidak menabrak footer */
-.swiper-container-wrapper {
-    position: relative;
-    padding: 0 45px; /* Memberi ruang untuk tombol navigasi kiri-kanan */
-    margin-bottom: 50px;
-}
-
-/* 2. Swiper Container */
-/* Memberi ruang di dalam agar pagination titik-titik tidak menempel card */
-.swiper {
-    padding-bottom: 60px !important;
-}
-
-/* 3. Slide Item */
-/* Memastikan tinggi otomatis agar flexbox card bekerja (h-100) */
-.swiper-slide {
-    height: auto !important;
-    display: flex;
-    justify-content: center;
-    padding-bottom: 20px; /* Ruang untuk shadow card saat hover */
-}
-
-/* 4. Card Design (Tanpa Gambar) */
-.class-card-video {
-    width: 100%;
-    border-radius: 16px;
-    background: #ffffff;
-    border-top: 6px solid; /* Aksen warna di atas */
-    transition: all 0.3s ease;
-    overflow: hidden;
-}
-
-/* Efek Hover: Naik ke atas sedikit */
-.class-card-video:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
-}
-
-/* Warna Border Atas Kondisional */
-.border-free {
-    border-top-color: #2ecc71 !important; /* Hijau (Gratis) */
-}
-.border-premium {
-    border-top-color: #f1c40f !important; /* Emas (Premium) */
-}
-
-/* 5. Badge Pojok Kanan Atas */
-.video-badge {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 6px 14px;
-    border-bottom-left-radius: 16px;
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    color: white;
-    box-shadow: -2px 2px 5px rgba(0,0,0,0.1);
-    z-index: 2;
-}
-
-/* 6. Kategori Badge Kecil */
-.badge-category-simple {
-    background: #f8f9fa;
-    color: #34495e;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    border: 1px solid #e9ecef;
-}
-
-/* 7. Harga Text */
-.price-text {
-    color: #2c3e50;
-    font-weight: 800;
-}
-
-/* 8. Tombol Navigasi Bulat (Floating) */
-.custom-nav-btn {
-    width: 45px !important;
-    height: 45px !important;
-    background: #ffffff !important;
-    border-radius: 50% !important;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
-    color: #34495e !important;
-    top: 45% !important; /* Posisi Vertikal Tengah */
-}
-
-.custom-nav-btn::after {
-    font-size: 18px !important;
-    font-weight: bold;
-}
-
-/* Geser tombol agar sedikit keluar dari area konten */
-.swiper-button-prev.custom-nav-btn { left: 0 !important; }
-.swiper-button-next.custom-nav-btn { right: 0 !important; }
-
-/* 9. Tombol Custom Premium */
-.btn-custom-bright {
-    background-color: #34495e;
-    color: white;
-    border: none;
-    transition: all 0.3s;
-}
-.btn-custom-bright:hover {
-    background-color: #2c3e50;
-    transform: translateY(-2px);
-    color: white;
-}
+    .course-card-hover {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .course-card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
 </style>
+@endsection

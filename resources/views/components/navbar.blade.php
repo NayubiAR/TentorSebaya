@@ -12,12 +12,6 @@
         <h1 class="text-white" style="margin-right: 10px;">|</h1>
         <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
             <x-category-nav />
-            {{-- <form class="d-flex me-md-5" role="search" method="GET" action="{{ route('movies.search') }}">
-                <input class="form-control search-box" type="search" name="q" value="{{ request('q') }}"
-                    placeholder="Cari Disini" aria-label="Search">
-                <i class="fa-solid fa-magnifying-glass search-icon" onclick="this.closest('form').submit();"
-                    style="cursor: pointer"></i>
-            </form> --}}
             @auth
                 <li class="nav-item dropdown text-white" style="margin-right: 50px; list-style: none;">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -75,10 +69,10 @@
             @guest
                 <div class="d-flex align-items-center gap-2" style="margin-right: 20px">
                     <a href="{{ route('login') }}" class="btn btn-outline-custom-bright px-4 rounded-pill">
-                        Login
+                        Masuk
                     </a>
                     <a href="{{ route('register') }}" class="btn btn-custom-bright px-4 rounded-pill shadow-sm">
-                        Register
+                        Daftar
                     </a>
                 </div>
             @endguest
