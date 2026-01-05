@@ -9,6 +9,9 @@
         <a href="{{ route('admin.courses.create') }}" class="btn btn-primary rounded-pill px-4 fw-bold">
             <i class="fa-solid fa-plus me-2"></i> Tambah Kelas Baru
         </a>
+        <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary rounded-pill">
+                    <i class="fa-solid fa-arrow-left me-2"></i> Kembali
+        </a>
     </div>
 
     {{-- ==========================================
@@ -25,7 +28,7 @@
         </div>
     @endif
 
-    <div class="shadow-sm">
+    <div class="shadow-sm rounded-4 overflow-hidden">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
@@ -41,8 +44,15 @@
                     <tr>
                         <td class="px-4">
                             <div class="d-flex align-items-center">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($course->title) }}&background=random&size=100"
-                                     class="rounded-3 me-3" width="50" height="50">
+                                @if($course->thumbnail)
+                                    {{-- Jika ada gambar upload, pakai itu --}}
+                                    <img src="{{ asset('storage/' . $course->thumbnail) }}"
+                                        class="rounded-3 me-3" width="50" height="50" alt="{{ $course->title }}">
+                                @else
+                                    {{-- Jika tidak ada, pakai dummy --}}
+                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($course->title) }}"
+                                        class="rounded-3 me-3" width="50" height="50" alt="{{ $course->title }}">
+                                @endif
                                 <div>
                                     <h6 class="mb-0 fw-bold">{{ $course->title }}</h6>
                                     <small class="text-muted">{{ $course->duration }}</small>

@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use App\Models\Category;
+use Illuminate\Support\Facades\Storage; // <--- WAJIB
 
 class CourseController extends Controller
 {
@@ -32,27 +33,32 @@ class CourseController extends Controller
     // UPDATE METHOD INI:
     public function store(Request $request)
     {
-        // 1. Validasi
         $request->validate([
             'title' => 'required|string|max:255',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Validasi Gambar
             'category_id' => 'required',
             'description' => 'required',
-            'access_type' => 'required', // <--- Ganti validasi price jadi ini
+            'access_type' => 'required',
             'duration' => 'required|string',
             'video_url' => 'required|string',
         ]);
 
-        // 2. Tentukan Harga berdasarkan Tipe Akses
-        // Logika sistem kita: Price 0 = Gratis, Price > 0 = Premium
+        // Proses Upload Gambar
+        $thumbnailPath = null;
+        if ($request->hasFile('thumbnail')) {
+            // Simpan ke folder 'thumbnails' di dalam storage/app/public
+            $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
+        }
+
         $price = ($request->access_type == 'premium') ? 100000 : 0;
 
-        // 3. Simpan ke Database
         Course::create([
             'category_id' => $request->category_id,
             'title' => $request->title,
+            'thumbnail' => $thumbnailPath, // <--- Simpan path gambar
             'slug' => Str::slug($request->title),
             'description' => $request->description,
-            'price' => $price, // <--- Masukkan hasil logika di atas
+            'price' => $price,
             'duration' => $request->duration,
             'video_url' => $request->video_url,
             'is_published' => true,
@@ -73,6 +79,7 @@ class CourseController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'category_id' => 'required',
             'description' => 'required',
             'access_type' => 'required',
@@ -80,18 +87,28 @@ class CourseController extends Controller
             'video_url' => 'required|string',
         ]);
 
-        // Cek lagi: Gratis atau Premium?
-        $price = ($request->access_type == 'premium') ? 100000 : 0;
-
-        $course->update([
+        $data = [
             'category_id' => $request->category_id,
             'title' => $request->title,
             'slug' => Str::slug($request->title),
             'description' => $request->description,
-            'price' => $price,
+            'price' => ($request->access_type == 'premium') ? 100000 : 0,
             'duration' => $request->duration,
             'video_url' => $request->video_url,
-        ]);
+        ];
+
+        // Cek apakah user upload gambar baru?
+        if ($request->hasFile('thumbnail')) {
+            // 1. Hapus gambar lama jika ada (biar server gak penuh)
+            if ($course->thumbnail && Storage::disk('public')->exists($course->thumbnail)) {
+                Storage::disk('public')->delete($course->thumbnail);
+            }
+
+            // 2. Upload gambar baru
+            $data['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
+        }
+
+        $course->update($data);
 
         return redirect()->route('admin.courses.index')->with('success', 'Kelas berhasil diperbarui!');
     }
@@ -99,6 +116,11 @@ class CourseController extends Controller
     // PROSES HAPUS DATA
     public function destroy(Course $course)
     {
+        // Hapus gambar dari penyimpanan jika ada
+        if ($course->thumbnail && Storage::disk('public')->exists($course->thumbnail)) {
+            Storage::disk('public')->delete($course->thumbnail);
+        }
+
         $course->delete();
         return redirect()->route('admin.courses.index')->with('success', 'Kelas berhasil dihapus!');
     }

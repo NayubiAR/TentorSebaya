@@ -17,7 +17,7 @@
                 <div class="card-body p-5">
 
                     {{-- Form mengarah ke route UPDATE --}}
-                    <form action="{{ route('admin.courses.update', $course->id) }}" method="POST">
+                    <form action="{{ route('admin.courses.update', $course->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT') {{-- Wajib untuk Update data --}}
 
@@ -25,6 +25,21 @@
                         <div class="mb-4">
                             <label class="form-label fw-bold text-white">Judul Kelas</label>
                             <input type="text" name="title" class="form-control py-3" value="{{ $course->title }}" required>
+                        </div>
+
+                        {{-- Thumbnail (BARU) --}}
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-white">Ganti Gambar Sampul</label>
+
+                            {{-- Preview Gambar Lama --}}
+                            @if($course->thumbnail)
+                                <div class="mb-2">
+                                    <img src="{{ asset('storage/' . $course->thumbnail) }}" alt="Thumbnail Lama" class="img-thumbnail rounded-3" style="max-height: 150px;">
+                                </div>
+                            @endif
+
+                            <input type="file" name="thumbnail" class="form-control" accept="image/*">
+                            <div class="form-text">Biarkan kosong jika tidak ingin mengubah gambar.</div>
                         </div>
 
                         <div class="row">

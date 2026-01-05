@@ -6,6 +6,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 
 Route::get('/', function () {
     return view('auth.login');
@@ -27,9 +29,9 @@ Route::post('/subscribe/process', [SubscriptionController::class, 'upgrade'])->n
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
 
-    Route::get('/dashboard', function() {
-        return view('admin.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('courses', AdminCourseController::class);
+
+    Route::resource('categories', AdminCategoryController::class);
 });

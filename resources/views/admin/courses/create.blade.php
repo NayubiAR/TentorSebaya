@@ -18,13 +18,20 @@
             <div class=" border-0 shadow-sm rounded-4">
                 <div class="card-body p-5">
 
-                    <form action="{{ route('admin.courses.store') }}" method="POST">
+                    <form action="{{ route('admin.courses.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
                         {{-- 1. Judul Kelas --}}
                         <div class="mb-4">
                             <label class="form-label fw-bold text-white">Judul Kelas</label>
                             <input type="text" name="title" class="form-control py-3" placeholder="Contoh: Belajar Laravel Dasar" required>
+                        </div>
+
+                        {{-- 1.5. Thumbnail (BARU) --}}
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-white">Gambar Sampul (Thumbnail)</label>
+                            <input type="file" name="thumbnail" class="form-control" accept="image/*">
+                            <div class="form-text">Format: JPG, PNG, JPEG. Maksimal 2MB.</div>
                         </div>
 
                         <div class="row">

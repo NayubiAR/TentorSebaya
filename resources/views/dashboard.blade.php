@@ -135,7 +135,7 @@
 
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4" style="margin-left: 110px; margin-bottom: 40px;">
         @foreach($courses as $kelas)
             {{-- LOGIKA PENENTUAN AKSES --}}
             @php
@@ -152,9 +152,17 @@
 
                     {{-- Thumbnail / Badge --}}
                     <div class="position-relative bg-light overflow-hidden" style="height: 200px;">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode($kelas->title) }}&background=random&size=400"
-                             class="w-100 h-100 object-fit-cover" alt="{{ $kelas->title }}">
+                        @if($kelas->thumbnail)
+                            {{-- Jika ada gambar upload, pakai itu --}}
+                            <img src="{{ asset('storage/' . $kelas->thumbnail) }}"
+                                class="w-100 h-100 object-fit-cover" alt="{{ $kelas->title }}">
+                        @else
+                            {{-- Jika tidak ada, pakai dummy --}}
+                            <img src="https://ui-avatars.com/api/?name={{ urlencode($kelas->title) }}&background=random&size=400"
+                                class="w-100 h-100 object-fit-cover" alt="{{ $kelas->title }}">
+                        @endif
 
+                        {{-- Badge Status tetap di sini --}}
                         <div class="position-absolute top-0 end-0 m-3">
                             @if($isFree)
                                 <span class="badge bg-success shadow-sm">GRATIS</span>
